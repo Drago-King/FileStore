@@ -118,11 +118,12 @@ async def handle_normal_message(client, message):
 
     codeflix_msgs = []
 
-    
-            original_caption = sanitize_caption(msg.caption.html if msg.caption else "")
-            custom_caption = "<b>𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV</b>"
-            caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
-            caption = caption[:1024]
+for msg in messages:
+    try:
+        original_caption = sanitize_caption(msg.caption.html if msg.caption else "")
+        custom_caption = "<b>𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV</b>"
+        caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
+        caption = caption[:1024]
 
 
             reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
