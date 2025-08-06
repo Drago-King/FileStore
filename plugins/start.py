@@ -101,18 +101,35 @@ async def start_command(client: Client, message: Message):
                                              filename=msg.document.file_name) if bool(CUSTOM_CAPTION) and bool(msg.document)
                        else ("" if not msg.caption else msg.caption.html))
             reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
-            try:
-                copied_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=reply_markup,
-                    protect_content=PROTECT_CONTENT
-                )
-                await asyncio.sleep(0.1)
-                codeflix_msgs.append(copied_msg)
-            except Exception as e:
-                print(f"Failed to send message: {e}")
+                try:
+        if msg.document:
+            file_id = msg.document.file_id
+
+            if CUSTOM_CAPTION:
+                caption = f"{caption}\n\n{CUSTOM_CAPTION}" if caption else CUSTOM_CAPTION
+            caption = caption[:1024]
+
+            copied_msg = await message.reply_document(
+                document=file_id,
+                caption=caption,
+                reply_to_message_id=message.id,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+        else:
+            copied_msg = await msg.copy(
+                chat_id=message.from_user.id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
+        await asyncio.sleep(0.1)
+        codeflix_msgs.append(copied_msg)
+
+    except Exception as e:
+        print(f"Failed to send message: {e}")
 
         if FILE_AUTO_DELETE > 0:
             notification_msg = await message.reply(
