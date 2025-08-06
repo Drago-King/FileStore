@@ -86,33 +86,34 @@ async def start_command(client: Client, message: Message):
                 return
 
         temp_msg = await message.reply("<b>Please wait...</b>")
-        try:
-            messages = await get_messages(client, ids)
-        except Exception as e:
-            await message.reply_text("Something went wrong!")
-            print(f"Error getting messages: {e}")
-            return
-        finally:
-            await temp_msg.delete()
- 
-        codeflix_msgs = []
-        for msg in messages:
-           original_caption = msg.caption.html if msg.caption else ""
-custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
-caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
-caption = caption[:1024]
+        temp_msg = await message.reply("<b>Please wait...</b>")
+try:
+    messages = await get_messages(client, ids)
+except Exception as e:
+    await message.reply_text("Something went wrong!")
+    print(f"Error getting messages: {e}")
+    return
+finally:
+    await temp_msg.delete()
 
-            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
-            try:
-                copied_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=reply_markup,
-                    protect_content=PROTECT_CONTENT
-                )
-                await asyncio.sleep(0.1)
-                codeflix_msgs.append(copied_msg)
+codeflix_msgs = []
+for msg in messages:
+    original_caption = msg.caption.html if msg.caption else ""
+    custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
+    caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
+    caption = caption[:1024]
+
+    reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+    try:
+        copied_msg = await msg.copy(
+            chat_id=message.from_user.id,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup,
+            protect_content=PROTECT_CONTENT
+        )
+        await asyncio.sleep(0.1)
+        codeflix_msgs.append(copied_msg)
             except Exception as e:
                 print(f"Failed to send message: {e}")
 
