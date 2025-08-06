@@ -97,9 +97,11 @@ async def start_command(client: Client, message: Message):
  
         codeflix_msgs = []
         for msg in messages:
-            caption = (CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, 
-                                             filename=msg.document.file_name) if bool(CUSTOM_CAPTION) and bool(msg.document)
-                       else ("" if not msg.caption else msg.caption.html))
+           original_caption = msg.caption.html if msg.caption else ""
+custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
+caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
+caption = caption[:1024]
+
             reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
             try:
                 copied_msg = await msg.copy(
