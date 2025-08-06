@@ -110,15 +110,70 @@ async def handle_normal_message(client, message):
 
     codeflix_msgs = []
 
-    for msg in messages:
-        try:
-            original_caption = msg.caption.html if msg.caption else ""
-            custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
-            caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
-            caption = caption[:1024]
+for msg in messages:
+    try:
+        original_caption = msg.caption.html if msg.caption else ""
+        custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
 
-            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+        # Combine both captions
+        caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
+        caption = caption[:1024]  # Ensure within Telegram's limit
 
+        reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+
+        # Send based on message type
+        if msg.video:
+            copied_msg = await client.send_video(
+                chat_id=message.from_user.id,
+                video=msg.video.file_id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
+        elif msg.document:
+            copied_msg = await client.send_document(
+                chat_id=message.from_user.id,
+                document=msg.document.file_id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
+        elif msg.photo:
+            copied_msg = await client.send_photo(
+                chat_id=message.from_user.id,
+                photo=msg.photo.file_id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
+        elif msg.audio:
+            copied_msg = await client.send_audio(
+                chat_id=message.from_user.id,
+                audio=msg.audio.file_id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
+        elif msg.voice:
+            copied_msg = await client.send_voice(
+                chat_id=message.from_user.id,
+                voice=msg.voice.file_id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
+        else:
+            # Fallback to copy with forced caption
             copied_msg = await msg.copy(
                 chat_id=message.from_user.id,
                 caption=caption,
@@ -127,11 +182,10 @@ async def handle_normal_message(client, message):
                 protect_content=PROTECT_CONTENT
             )
 
-            await asyncio.sleep(0.1)
-            codeflix_msgs.append(copied_msg)
+        await asyncio.sleep(0.1)
 
-        except Exception as e:
-            print(f"Failed to send message: {e}")
+    except Exception as e:
+        print(f"Failed to send message: {e}")
         if FILE_AUTO_DELETE > 0:
             notification_msg = await message.reply(
                 f"<b>Tʜɪs Fɪʟᴇ ᴡɪʟʟ ʙᴇ Dᴇʟᴇᴛᴇᴅ ɪɴ  {get_exp_time(FILE_AUTO_DELETE)}. Pʟᴇᴀsᴇ sᴀᴠᴇ ᴏʀ ғᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ʙᴇғᴏʀᴇ ɪᴛ ɢᴇᴛs Dᴇʟᴇᴛᴇᴅ.</b>"
