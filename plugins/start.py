@@ -86,7 +86,6 @@ async def start_command(client: Client, message: Message):
                 return
 
         temp_msg = await message.reply("<b>Please wait...</b>")
-        temp_msg = await message.reply("<b>Please wait...</b>")
 try:
     messages = await get_messages(client, ids)
 except Exception as e:
