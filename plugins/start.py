@@ -58,60 +58,74 @@ async def start_command(client: Client, message: Message):
     FILE_AUTO_DELETE = await db.get_del_timer()  # Example: 3600 seconds (1 hour)
 
     # Handle normal message flow
+    @Client.on_message(filters.private & filters.text)
+async def handle_normal_message(client, message):
     text = message.text
-    if len(text) > 7:
-        try:
-            base64_string = text.split(" ", 1)[1]
-        except IndexError:
+
+    if len(text) <= 7:
+        return
+
+    try:
+        base64_string = text.split(" ", 1)[1]
+    except IndexError:
+        return
+
+    try:
+        decoded_string = await decode(base64_string)
+    except Exception as e:
+        await message.reply_text("Invalid or corrupted data.")
+        print(f"Decode error: {e}")
+        return
+
+    arguments = decoded_string.split("-")
+    ids = []
+
+    try:
+        if len(arguments) == 3:
+            start = int(int(arguments[1]) / abs(client.db_channel.id))
+            end = int(int(arguments[2]) / abs(client.db_channel.id))
+            ids = list(range(start, end + 1)) if start <= end else list(range(start, end - 1, -1))
+
+        elif len(arguments) == 2:
+            ids = [int(int(arguments[1]) / abs(client.db_channel.id))]
+
+        else:
+            await message.reply_text("Invalid link format.")
             return
 
-        string = await decode(base64_string)
-        argument = string.split("-")
+    except Exception as e:
+        print(f"Error decoding IDs: {e}")
+        await message.reply_text("Something went wrong while processing the link.")
+        return
 
-        ids = []
-        if len(argument) == 3:
-            try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
-                ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
-            except Exception as e:
-                print(f"Error decoding IDs: {e}")
-                return
+    temp_msg = await message.reply("<b>Please wait...</b>")
 
-        elif len(argument) == 2:
-            try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-            except Exception as e:
-                print(f"Error decoding ID: {e}")
-                return
-
-        temp_msg = await message.reply("<b>Please wait...</b>")
-try:
-    messages = await get_messages(client, ids)
-except Exception as e:
-    await message.reply_text("Something went wrong!")
-    print(f"Error getting messages: {e}")
-    return
-finally:
-    await temp_msg.delete()
-
-codeflix_msgs = []
-for msg in messages:
     try:
-        original_caption = msg.caption.html if msg.caption else ""
-        custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
-        caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
-        caption = caption[:1024]
+        messages = await get_messages(client, ids)
+    except Exception as e:
+        await message.reply_text("Something went wrong while retrieving messages.")
+        print(f"Error getting messages: {e}")
+        return
+    finally:
+        await temp_msg.delete()
 
-        reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+    for msg in messages:
+        try:
+            original_caption = msg.caption.html if msg.caption else ""
+            custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
+            caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
+            caption = caption[:1024]  # Telegram max caption length
 
-        copied_msg = await msg.copy(
-            chat_id=message.from_user.id,
-            caption=caption,
-            parse_mode=ParseMode.HTML,
-            reply_markup=reply_markup,
-            protect_content=PROTECT_CONTENT
-        )
+            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+
+            await msg.copy(
+                chat_id=message.from_user.id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
+            )
+
         await asyncio.sleep(0.1)
         codeflix_msgs.append(copied_msg)
 
