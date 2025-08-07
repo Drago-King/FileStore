@@ -55,7 +55,7 @@ async def start_command(client: Client, message: Message):
         return await not_joined(client, message)
 
     # File auto-delete time in seconds (Set your desired time in seconds here)
-    @Client.on_message(filters.private & filters.text)
+@Client.on_message(filters.private & filters.text)
 async def handle_normal_message(client, message):
     FILE_AUTO_DELETE = await db.get_del_timer()  # ✅ Fixed
 
@@ -110,47 +110,44 @@ async def handle_normal_message(client, message):
 
     codeflix_msgs = []
 
+@Bot.on_message(filters.command('start') & filters.private)
+async def start_command(client: Client, message: Message):
+    ...
     for msg in messages:
         try:
-            original_caption = msg.caption.html if msg.caption else ""
-            custom_caption = "𝚄𝙿𝙻𝙾𝙰𝙳𝙴𝙳 𝙱𝚈 @EchoFlix_TV"
-            caption = f"{original_caption}\n\n{custom_caption}" if original_caption else custom_caption
-            caption = caption[:1024]
-
-            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
-
             if msg.document:
-    copied_msg = await message.reply_document(
-        document=msg.document.file_id,
-        caption=caption,
-        reply_to_message_id=message.id,
-        reply_markup=reply_markup,
-        protect_content=PROTECT_CONTENT
-    )
+                copied_msg = await message.reply_document(
+                    document=msg.document.file_id,
+                    caption=caption,
+                    reply_to_message_id=message.id,
+                    reply_markup=reply_markup,
+                    protect_content=PROTECT_CONTENT
+                )
 
-elif msg.video:
-    copied_msg = await message.reply_video(
-        video=msg.video.file_id,
-        caption=caption,
-        parse_mode=ParseMode.HTML,
-        reply_markup=reply_markup,
-        protect_content=PROTECT_CONTENT
-    )
+            elif msg.video:
+                copied_msg = await message.reply_video(
+                    video=msg.video.file_id,
+                    caption=caption,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=reply_markup,
+                    protect_content=PROTECT_CONTENT
+                )
 
-else:
-    copied_msg = await msg.copy(
-        chat_id=message.from_user.id,
-        caption=caption,
-        parse_mode=ParseMode.HTML,
-        reply_markup=reply_markup,
-        protect_content=PROTECT_CONTENT
-    )
+            else:
+                copied_msg = await msg.copy(
+                    chat_id=message.from_user.id,
+                    caption=caption,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=reply_markup,
+                    protect_content=PROTECT_CONTENT
+                )
 
-await asyncio.sleep(0.1)
-codeflix_msgs.append(copied_msg)
+            await asyncio.sleep(0.1)
+            codeflix_msgs.append(copied_msg)
 
         except Exception as e:
             print(f"Failed to send message: {e}")
+
         if FILE_AUTO_DELETE > 0:
             notification_msg = await message.reply(
                 f"<b>Tʜɪs Fɪʟᴇ ᴡɪʟʟ ʙᴇ Dᴇʟᴇᴛᴇᴅ ɪɴ  {get_exp_time(FILE_AUTO_DELETE)}. Pʟᴇᴀsᴇ sᴀᴠᴇ ᴏʀ ғᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ʙᴇғᴏʀᴇ ɪᴛ ɢᴇᴛs Dᴇʟᴇᴛᴇᴅ.</b>"
@@ -201,7 +198,7 @@ codeflix_msgs.append(copied_msg)
 chat_data_cache = {}
 
 async def not_joined(client: Client, message: Message):
-    temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>")
+temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>")
 
     user_id = message.from_user.id
     buttons = []
