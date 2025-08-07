@@ -94,44 +94,46 @@ async def start_command(client: Client, message: Message):
             return
         finally:
             await temp_msg.delete()
- 
-        codeflix_msgs = []
+            
+@Client.on_message(filters.command("start") & filters.private)
+async def start_command(client, message):
+    codeflix_msgs = []
 
-for msg in messages:
-    original_caption = msg.caption.html if msg.caption else ""
-    custom_caption = ""
+    for msg in messages:
+        original_caption = msg.caption.html if msg.caption else ""
+        custom_caption = ""
 
-    # Append custom caption if available
-    if CUSTOM_CAPTION:
-        if msg.document and hasattr(msg.document, "file_name"):
-            custom_caption = CUSTOM_CAPTION.format(
-                previouscaption=original_caption,
-                filename=msg.document.file_name
+        # Append custom caption if available
+        if CUSTOM_CAPTION:
+            if msg.document and hasattr(msg.document, "file_name"):
+                custom_caption = CUSTOM_CAPTION.format(
+                    previouscaption=original_caption,
+                    filename=msg.document.file_name
+                )
+            else:
+                custom_caption = CUSTOM_CAPTION.format(
+                    previouscaption=original_caption,
+                    filename=""
+                )
+
+        # Combine old + new caption
+        caption = f"{original_caption}\n\n{custom_caption}".strip()
+        caption = caption[:1024]  # Telegram limit
+
+        reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+
+        try:
+            copied_msg = await msg.copy(
+                chat_id=message.from_user.id,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
+                protect_content=PROTECT_CONTENT
             )
-        else:
-            custom_caption = CUSTOM_CAPTION.format(
-                previouscaption=original_caption,
-                filename=""
-            )
-
-    # Combine old + new caption
-    caption = f"{original_caption}\n\n{custom_caption}".strip()
-    caption = caption[:1024]  # Telegram limit
-
-    reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
-
-    try:
-        copied_msg = await msg.copy(
-            chat_id=message.from_user.id,
-            caption=caption,
-            parse_mode=ParseMode.HTML,
-            reply_markup=reply_markup,
-            protect_content=PROTECT_CONTENT
-        )
-        await asyncio.sleep(0.1)
-        codeflix_msgs.append(copied_msg)
-    except Exception as e:
-        print(f"Failed to send message: {e}")
+            await asyncio.sleep(0.1)
+            codeflix_msgs.append(copied_msg)
+        except Exception as e:
+            print(f"Failed to send message: {e}")
 
         if FILE_AUTO_DELETE > 0:
             notification_msg = await message.reply(
