@@ -119,16 +119,35 @@ async def handle_normal_message(client, message):
 
             reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
 
-            copied_msg = await msg.copy(
-                chat_id=message.from_user.id,
-                caption=caption,
-                parse_mode=ParseMode.HTML,
-                reply_markup=reply_markup,
-                protect_content=PROTECT_CONTENT
-            )
+            if msg.document:
+    copied_msg = await message.reply_document(
+        document=msg.document.file_id,
+        caption=caption,
+        reply_to_message_id=message.id,
+        reply_markup=reply_markup,
+        protect_content=PROTECT_CONTENT
+    )
 
-            await asyncio.sleep(0.1)
-            codeflix_msgs.append(copied_msg)
+elif msg.video:
+    copied_msg = await message.reply_video(
+        video=msg.video.file_id,
+        caption=caption,
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup,
+        protect_content=PROTECT_CONTENT
+    )
+
+else:
+    copied_msg = await msg.copy(
+        chat_id=message.from_user.id,
+        caption=caption,
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup,
+        protect_content=PROTECT_CONTENT
+    )
+
+await asyncio.sleep(0.1)
+codeflix_msgs.append(copied_msg)
 
         except Exception as e:
             print(f"Failed to send message: {e}")
