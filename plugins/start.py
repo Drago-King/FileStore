@@ -96,23 +96,42 @@ async def start_command(client: Client, message: Message):
             await temp_msg.delete()
  
         codeflix_msgs = []
-        for msg in messages:
-            caption = (CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, 
-                                             filename=msg.document.file_name) if bool(CUSTOM_CAPTION) and bool(msg.document)
-                       else ("" if not msg.caption else msg.caption.html))
-            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
-            try:
-                copied_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=reply_markup,
-                    protect_content=PROTECT_CONTENT
-                )
-                await asyncio.sleep(0.1)
-                codeflix_msgs.append(copied_msg)
-            except Exception as e:
-                print(f"Failed to send message: {e}")
+
+for msg in messages:
+    original_caption = msg.caption.html if msg.caption else ""
+    custom_caption = ""
+
+    # Append custom caption if available
+    if CUSTOM_CAPTION:
+        if msg.document and hasattr(msg.document, "file_name"):
+            custom_caption = CUSTOM_CAPTION.format(
+                previouscaption=original_caption,
+                filename=msg.document.file_name
+            )
+        else:
+            custom_caption = CUSTOM_CAPTION.format(
+                previouscaption=original_caption,
+                filename=""
+            )
+
+    # Combine old + new caption
+    caption = f"{original_caption}\n\n{custom_caption}".strip()
+    caption = caption[:1024]  # Telegram limit
+
+    reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+
+    try:
+        copied_msg = await msg.copy(
+            chat_id=message.from_user.id,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup,
+            protect_content=PROTECT_CONTENT
+        )
+        await asyncio.sleep(0.1)
+        codeflix_msgs.append(copied_msg)
+    except Exception as e:
+        print(f"Failed to send message: {e}")
 
         if FILE_AUTO_DELETE > 0:
             notification_msg = await message.reply(
@@ -129,7 +148,7 @@ async def start_command(client: Client, message: Message):
     else:
         reply_markup = InlineKeyboardMarkup(
             [
-                    [InlineKeyboardButton("• ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟs •", url="https://t.me/Nova_Flix/50")],
+                    [InlineKeyboardButton("• ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟs •", url="https://t.me/addlist/pPNOE3JuW8Q1NzFl")],
 
     [
                     InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data = "about"),
@@ -213,7 +232,7 @@ async def not_joined(client: Client, message: Message):
                 except Exception as e:
                     print(f"Error with chat {chat_id}: {e}")
                     return await temp.edit(
-                        f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n"
+                        f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @Poseidon_xd</i></b>\n"
                         f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
                     )
 
@@ -243,7 +262,7 @@ async def not_joined(client: Client, message: Message):
     except Exception as e:
         print(f"Final Error: {e}")
         await temp.edit(
-            f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n"
+            f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @Poseidon_xd</i></b>\n"
             f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
         )
 
